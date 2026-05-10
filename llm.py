@@ -120,7 +120,7 @@ class Config:
     # Scheduler
     lr_scheduler_type = 'cosine'
     warmup_steps = 100
-    beta_max = 0.0
+    gamma = 0.0
 
     def update_from_args(self, args):
         for key, value in vars(args).items():
@@ -516,8 +516,8 @@ def apply_meaa(model_old, model_new, optimizer, lr, config):
     else:
         beta = (a - c) / det
         original_beta = beta
-        beta_max = getattr(config, 'beta_max', 1.5)
-        beta = max(0.0, min(beta_max, beta)) 
+        gamma = getattr(config, 'gamma', 1.5)
+        beta = max(0.0, min(gamma, beta)) 
     # beta = 0.1
     alpha = 1.0 - beta
     # print(f"alpha: {alpha:.4f}, beta: {beta:.4f}")
@@ -718,8 +718,8 @@ def apply_meaa(model_old, model_new, optimizer, lr, config):
 #         beta = 0.0
 #     else:
 #         beta = (a - c) / det
-#         beta_max = getattr(config, 'beta_max', 1.5)
-#         beta = max(0.0, min(beta_max, beta))
+#         gamma = getattr(config, 'gamma', 1.5)
+#         beta = max(0.0, min(gamma, beta))
 
 #     # if beta == 0.0:
 #     #     return
@@ -1677,7 +1677,7 @@ def setup_arg_parser():
                         choices=['linear', 'cosine', 'constant'], 
                         help='learning rate scheduler type')
     parser.add_argument('--warmup_steps', type=int, default=100, help='number of warmup steps')
-    parser.add_argument('--beta_max', type=float, default=0.0, help='beta_max')
+    parser.add_argument('--gamma', type=float, default=0.0, help='gamma')
 
     if DEEPSPEED_AVAILABLE:
         parser = deepspeed.add_config_arguments(parser)
@@ -1738,7 +1738,7 @@ def main():
     if config.training_mode == "deepspeed":
         output_csv = directory_path + f"/{config.training_mode}_stage_{config.stage}.csv"
     else:
-        output_csv = directory_path + f"/{config.training_mode}_{config.adaptivity_type}_P_{config.P}_tor_{config.threshold}_ema_{config.ema_decay}_beta_max_{config.beta_max}.csv"
+        output_csv = directory_path + f"/{config.training_mode}_{config.adaptivity_type}_P_{config.P}_tor_{config.threshold}_ema_{config.ema_decay}_gamma_{config.gamma}.csv"
     
     config.checkpoint_dir = directory_path 
 

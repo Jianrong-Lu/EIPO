@@ -78,7 +78,7 @@ class Config:
     sampling_timesteps = 100
     objective = 'pred_noise'
     beta_schedule = 'linear'
-    beta_max = 0.0
+    gamma = 0.0
 
     def update_from_args(self, args):
         for key, value in vars(args).items():
@@ -557,8 +557,8 @@ def apply_meaa(model_old, model_new, optimizer, lr, config):
         beta = 0.0
     else:
         beta = (a - c) / det
-        beta_max = getattr(config, 'beta_max', 1.5)
-        beta = max(0.0, min(beta_max, beta))
+        gamma = getattr(config, 'gamma', 1.5)
+        beta = max(0.0, min(gamma, beta))
 
     # if beta == 0.0:
     #     return
@@ -824,7 +824,7 @@ if __name__ == '__main__':
     parser.add_argument('--device_count', type=int, help='Number of CUDA devices to use')
     parser.add_argument('--log_dir', type=str, help='Directory to save logs')
     parser.add_argument('--save_and_sample_every', type=int, help='Validate every N steps')
-    parser.add_argument('--beta_max', type=float, default=0.0, help='beta_max')
+    parser.add_argument('--gamma', type=float, default=0.0, help='gamma')
 
     args = parser.parse_args()
     
@@ -842,13 +842,13 @@ if __name__ == '__main__':
     
     if config.training_mode.lower() == 'parallel':
         output_csv = os.path.join(directory_path, 
-            f"{config.training_mode}_{config.paso_adaptivity_type}_P_{config.P}_tor_{config.threshold}_ema_{config.paso_ema_decay}_beta_max_{config.beta_max}.csv")
+            f"{config.training_mode}_{config.paso_adaptivity_type}_P_{config.P}_tor_{config.threshold}_ema_{config.paso_ema_decay}_gamma_{config.gamma}.csv")
     else:
         output_csv = os.path.join(directory_path, f"{config.training_mode}.csv")
         
     print(f"Saving logs to: {output_csv}")
 
-    resume_checkpoint_filename = os.path.join(directory_path, f"{config.training_mode}_{config.paso_adaptivity_type}_P_{config.P}_tor_{config.threshold}_ema_{config.paso_ema_decay}_beta_max_{config.beta_max}_resume_checkpoint.pth")
+    resume_checkpoint_filename = os.path.join(directory_path, f"{config.training_mode}_{config.paso_adaptivity_type}_P_{config.P}_tor_{config.threshold}_ema_{config.paso_ema_decay}_gamma_{config.gamma}_resume_checkpoint.pth")
     config.resume_checkpoint_path = resume_checkpoint_filename
 
     csv_logger = CSVLogger(output_csv)

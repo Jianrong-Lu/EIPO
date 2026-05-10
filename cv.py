@@ -79,7 +79,7 @@ class Config:
     dimhead = 512
 
     
-    beta_max = 0.0
+    gamma = 0.0
 
 
     # Logging and Validation
@@ -517,8 +517,8 @@ def apply_meaa(model_old, model_new, optimizer, lr, config):
     else:
         beta = (a - c) / det
         # original_beta = beta
-        beta_max = getattr(config, 'beta_max', 1.5)
-        beta = max(0.0, min(beta_max, beta)) 
+        gamma = getattr(config, 'gamma', 1.5)
+        beta = max(0.0, min(gamma, beta)) 
     # beta = 0.1
     alpha = 1.0 - beta
     print(f"alpha: {alpha:.4f}, beta: {beta:.4f}")
@@ -723,8 +723,8 @@ def apply_meaa(model_old, model_new, optimizer, lr, config):
         beta = 0.0
     else:
         beta = (a - c) / det
-        beta_max = getattr(config, 'beta_max', 1.5)
-        beta = max(0.0, min(beta_max, beta))
+        gamma = getattr(config, 'gamma', 1.5)
+        beta = max(0.0, min(gamma, beta))
 
     # if beta == 0.0:
     #     return
@@ -1259,7 +1259,7 @@ def setup_arg_parser():
     parser.add_argument('--optimizer_type', type=str, choices=['sgd', 'adam', 'adamw'], help='optimizer type')
     parser.add_argument('--training_mode', type=str, choices=['parallel', 'serial'], help='training mode')
     parser.add_argument('--dropout', type=float, default=0.0, help='dropout for vit')
-    parser.add_argument('--beta_max', type=float, default=0.0, help='beta_max')
+    parser.add_argument('--gamma', type=float, default=0.0, help='gamma')
 
 
     # Scheduler parameters
@@ -1350,13 +1350,13 @@ def main():
    
     if config.training_mode.lower() == 'parallel':
         output_csv = os.path.join(directory_path, 
-            f"{config.training_mode}_{config.adaptivity_type}_P_{config.P}_tor_{config.threshold}_ema_{config.ema_decay}_beta_max_{config.beta_max}.csv")
+            f"{config.training_mode}_{config.adaptivity_type}_P_{config.P}_tor_{config.threshold}_ema_{config.ema_decay}_gamma_{config.gamma}.csv")
     else:
         output_csv = os.path.join(directory_path, f"{config.training_mode}.csv")
         
     print(f"Saving logs to: {output_csv}")
 
-    resume_checkpoint_filename = os.path.join(directory_path, f"{config.training_mode}_{config.adaptivity_type}_P_{config.P}_tor_{config.threshold}_ema_{config.ema_decay}_beta_max_{config.beta_max}"+"_resume_checkpoint.pth")
+    resume_checkpoint_filename = os.path.join(directory_path, f"{config.training_mode}_{config.adaptivity_type}_P_{config.P}_tor_{config.threshold}_ema_{config.ema_decay}_gamma_{config.gamma}"+"_resume_checkpoint.pth")
     config.resume_checkpoint_path = resume_checkpoint_filename
 
     csv_logger = CSVLogger(output_csv)
